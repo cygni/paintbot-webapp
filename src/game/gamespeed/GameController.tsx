@@ -16,6 +16,7 @@ const GameSpeedButton = styled.button`
   min-width: 32px;
   padding: 0 0.5rem;
   cursor: pointer;
+  transition: all 0.2s ease;
   
   &:first-child {
     border-radius: 6px 0 0 6px;
@@ -23,6 +24,10 @@ const GameSpeedButton = styled.button`
 
   &:last-child {
     border-radius: 0 6px 6px 0;
+  }
+  
+  &:hover {
+    opacity: 0.8;
   }
 `;
 

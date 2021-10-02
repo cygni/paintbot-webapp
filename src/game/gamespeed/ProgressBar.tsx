@@ -27,7 +27,7 @@ const ProgressBarContainer = styled.div`
   position: relative;
   width: 100%;
   height: 8px;
-  background-color: #000735;
+  background-color: #eab8b2;
 `;
 
 const Progress = styled.div`
@@ -36,14 +36,14 @@ const Progress = styled.div`
   left: 0;
   height: 8px;
   margin: 0;
-  background-color: #eab8b2;
+  background-color: #000735;
 `;
 
 const thumbCss = css`
   height: 8px;
   width: 0;
-  border-radius: none;
-  background-color: #eab8b2;
+  border-radius: 0;
+  background-color: #000735;
 `;
 
 const ProgressBarSlider = styled.input`
