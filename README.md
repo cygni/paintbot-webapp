@@ -6,8 +6,6 @@ React frontend for presenting games of Paintbot.
 
 First, make sure the Paintbot-dev-server is running (follow instructions in corresponding README). Then
 
-`cd frontend`
-
 `npm install`
 
 `npm start`
