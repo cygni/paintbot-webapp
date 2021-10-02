@@ -57,6 +57,7 @@ export const GameContainer = ({
 const Column = styled.div`
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 2px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%), 0 0 6px rgb(0 0 0 / 10%);
 `;
 
 const GamerControllerContainer = styled.div`

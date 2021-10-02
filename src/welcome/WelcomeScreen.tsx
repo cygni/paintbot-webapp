@@ -90,6 +90,6 @@ const ComicImages = styled.div`
 `;
 
 const ComicImage = styled.img`
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 2px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%), 0 0 6px rgb(0 0 0 / 10%);
   width: 100%;
 `;
