@@ -6,20 +6,24 @@ import { ReactComponent as Logo } from '../../resources/images/cygni-logo.svg';
 const StyledFooter = styled.footer`
   background-color: #000735;
   width: 100%;
-  padding: 1.5rem 1rem 1rem;
+  padding: 1rem 0.5rem 0.5rem;
+`;
+
+const StyledLink = styled.a`
+  display: inline-block;
 `;
 
 const CygniLogo = styled(Logo)`
-  height: 40px;
-  width: 110px;
+  height: 80px;
+  max-width: 100%;
 `;
 
 export default function Footer() {
   return (
     <StyledFooter>
-      <a href="https://cygni.se" aria-label="Cygni">
+      <StyledLink href="https://cygni.se" aria-label="Cygni, Part of Accenture">
         <CygniLogo />
-      </a>
+      </StyledLink>
     </StyledFooter>
   );
 }

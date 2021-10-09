@@ -1,4 +1,6 @@
 import React from 'react';
+import { Heading1 } from '../common/ui/Heading';
+import { Paper, PaperRow } from '../common/ui/Paper';
 
 import { CharacterColors } from '../common/Constants';
 import Config from '../Config';
@@ -11,6 +13,7 @@ import {
   EventType,
   GameBoardState,
   GameMap,
+  GameResult,
   GameSettings,
   GameState,
   TileMap,
@@ -24,6 +27,8 @@ interface State {
   gameSettings: GameSettings | undefined;
   gameState: GameState | undefined;
   gameBoardState: GameBoardState | undefined;
+  numberOfFetches: number;
+  error?: string;
 }
 
 const colours = [
@@ -63,6 +68,8 @@ export default class GameDirector extends React.Component<Props, State> {
     gameSettings: undefined,
     gameState: undefined,
     gameBoardState: undefined,
+    numberOfFetches: 0,
+    error: undefined,
   };
 
   private onUpdateFromServer(evt: MessageEvent) {
@@ -83,12 +90,19 @@ export default class GameDirector extends React.Component<Props, State> {
     const data = this.events[eventIndex];
     if (data) {
       if (data.type === EventType.GAME_STARTING_EVENT) {
-        this.setState({ gameSettings: data.gameSettings as GameSettings });
+        this.setState({
+          gameSettings: data.gameSettings as GameSettings,
+          gameState: data as GameState,
+        });
       } else if (data.type === EventType.GAME_UPDATE_EVENT) {
         this.setState({ gameState: data as GameState });
         const prevData = eventIndex > 0 ? this.events[eventIndex - 1] : undefined;
         const prevState = prevData && prevData.type === EventType.GAME_UPDATE_EVENT ? prevData : data;
         this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
+      }
+      else if (data.type === EventType.GAME_RESULT_EVENT) {
+        const gameResult = data as GameResult;
+        this.updatePointsFromGameResult(gameResult);
       }
     }
 
@@ -169,6 +183,16 @@ export default class GameDirector extends React.Component<Props, State> {
     });
   }
 
+  private updatePointsFromGameResult(gameResult: GameResult) {
+    const gameState = this.state.gameState;
+    if (gameState) {
+      gameState.map.characterInfos.forEach(c => {
+        c.points = gameResult.playerRanks.filter(p => p.playerId === c.id)[0]?.points || c.points;
+      });
+      this.setState({ gameState: gameState });
+    }
+  }
+
   private endGame() {
     if (this.ws !== undefined) {
       this.ws.close();
@@ -193,15 +217,32 @@ export default class GameDirector extends React.Component<Props, State> {
     this.playOneTick(this.currentEventIndex);
   };
 
-  async componentDidMount() {
+  private async fetchGame() {
+    const response = await fetch(`${Config.BackendUrl}/history/${this.props.id}`);
+    if (response.status === 404) {
+      if (this.state.numberOfFetches < 5) {
+        this.setState({numberOfFetches: this.state.numberOfFetches + 1});
+        setTimeout(() => this.fetchGame(), 2000);
+      }
+      else {
+        this.setState({error: "Game not found"});
+      }
+    }
+    else {
+      const json = await response.json();
+      json.messages.forEach((msg: any) => this.events.push(msg));
+      this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+    }
+  }
+
+  componentDidMount() {
     if (this.props.id) {
-      const response = await fetch(`${Config.BackendUrl}/history/${this.props.id}`).then(r => r.json());
-      response.messages.forEach((msg: any) => this.events.push(msg));
+      this.fetchGame();
     } else {
       this.ws = new WebSocket(Config.WebSocketApiUrl);
       this.ws.onmessage = (evt: MessageEvent) => this.onUpdateFromServer(evt);
+      this.updateGameSpeedInterval(Config.DefaultGameSpeed);
     }
-    this.updateGameSpeedInterval(Config.DefaultGameSpeed);
   }
 
   componentWillUnmount() {
@@ -209,30 +250,46 @@ export default class GameDirector extends React.Component<Props, State> {
   }
 
   getComponentToRender() {
-    if (this.state.gameSettings && this.state.gameState) {
-      const gameStatus = this.state.gameState.type;
-      const { gameBoardState, gameSettings } = this.state;
+    const gameStatus = this.state.gameState?.type;
+    const { gameBoardState, gameSettings, error } = this.state;
 
-      if (!gameStatus) {
-        return <h1>Waiting for game</h1>;
-      } else if (gameStatus === EventType.GAME_STARTING_EVENT) {
-        return <h1>Game is starting</h1>;
-      } else if (gameStatus === EventType.GAME_UPDATE_EVENT && gameBoardState) {
-        return (
-          <GameContainer
-            gameBoardState={gameBoardState}
-            gameSettings={gameSettings}
-            onGameSpeedChange={this.updateGameSpeedInterval}
-            onPauseGame={this.pauseGame}
-            onRestartGame={this.restartGame}
-            onWorldTickChange={this.setWorldTick}
-          />
-        );
-      } else if (gameStatus === EventType.GAME_ENDED_EVENT) {
-        this.endGame();
-        return <h1>Game finished</h1>;
-      }
+    if (error) {
+      return (
+        <Paper>
+          <PaperRow>
+            <Heading1>Game Not Found</Heading1>
+          </PaperRow>
+          <PaperRow>
+            This game is not in the archive.
+          </PaperRow>
+          <PaperRow>
+            If this is a recent game, it might not have been stored yet.
+            Try reloading the page in a few seconds.
+          </PaperRow>
+        </Paper>
+      );
     }
+
+    if (!gameStatus) {
+      return <p>Loading game...</p>;
+    } else if (gameStatus === EventType.GAME_STARTING_EVENT) {
+      return <p>Game is starting...</p>;
+    } else if ((gameStatus === EventType.GAME_UPDATE_EVENT || gameStatus === EventType.GAME_RESULT_EVENT) && gameBoardState && gameSettings) {
+      return (
+        <GameContainer
+          gameBoardState={gameBoardState}
+          gameSettings={gameSettings}
+          onGameSpeedChange={this.updateGameSpeedInterval}
+          onPauseGame={this.pauseGame}
+          onRestartGame={this.restartGame}
+          onWorldTickChange={this.setWorldTick}
+        />
+      );
+    } else if (gameStatus === EventType.GAME_ENDED_EVENT) {
+      this.endGame();
+      return <h1>Game finished</h1>;
+    }
+
     return null;
   }
 

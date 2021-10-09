@@ -32,7 +32,7 @@ export default function AboutScreen() {
           <li>5 points per stun caused (through power-ups)</li>
           <li>10 ticks before stun is over</li>
           <li>3 ticks of invulnerability after being stunned</li>
-          <li>5 holes</li>
+          <li>30 obstacles</li>
           <li>Bots may carry one power-up at a time</li>
           <li>The power-up may be used at any point</li>
           <li>Using the power-up fills the tiles within Manhattan distance 4 from your bot</li>

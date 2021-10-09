@@ -9,7 +9,7 @@ import { SortOrder, sortPlayers } from '../Util';
 describe('Verify ScoreBoardContainer', () => {
   it('should not create players if characters is empty', () => {
     const characters: Character[] = [];
-    render(<ScoreBoardContainer players={characters} />);
+    render(<ScoreBoardContainer players={characters} worldTick={Math.random() * 100} gameDurationInTicks={Math.random() * 100} ticksPerRender={Math.random() * 100} />);
     expect(screen.queryByTestId('score-board-entry')).toBeNull();
   });
 });

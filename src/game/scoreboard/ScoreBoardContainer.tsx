@@ -9,7 +9,9 @@ import { SortOrder, sortPlayers } from './Util';
 
 interface Props {
   players: Character[];
-  worldTick?: number;
+  worldTick: number;
+  gameDurationInTicks: number;
+  ticksPerRender: number
 }
 
 const Container = styled.div`
@@ -26,7 +28,8 @@ export default class ScoreBoardContainer extends React.Component<Props> {
     });
   }
   shouldComponentUpdate(nextProps: Props) {
-    return !!nextProps.worldTick && (nextProps.worldTick % 5 === 0 || nextProps.worldTick === 1);
+    const { worldTick, ticksPerRender, gameDurationInTicks } = nextProps;
+    return worldTick % ticksPerRender === 0 || worldTick === gameDurationInTicks - 1; // Updates on every ticksPerRender tick and also the last tick
   }
 
   render() {

@@ -26,10 +26,16 @@ export const GameContainer = ({
   onWorldTickChange,
 }: GameContainerProps) => {
   const lastWorldTick = (1000 * gameSettings.gameDurationInSeconds) / gameSettings.timeInMsPerTick;
-
+  const getDurationInTicks = ({ gameDurationInSeconds, timeInMsPerTick }: GameSettings): number => {
+    return gameDurationInSeconds * 1000 / timeInMsPerTick
+  }
   return (
     <FlexContainer>
-      <ScoreBoardContainer players={gameBoardState.characters} worldTick={gameBoardState.worldTick} />
+      <ScoreBoardContainer
+        players={gameBoardState.characters}
+        worldTick={gameBoardState.worldTick}
+        gameDurationInTicks={getDurationInTicks(gameSettings)}
+        ticksPerRender={5} />
       <Column>
         <GameBoardContainer gameBoardState={gameBoardState} explosionRange={gameSettings.explosionRange} />
         <ProgressBar

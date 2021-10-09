@@ -92,6 +92,17 @@ export interface PowerUp {
   image: string;
 }
 
+export interface GameResult {
+  playerRanks: PlayerRank[];
+}
+
+export interface PlayerRank {
+  playerName: string;
+  playerId: string;
+  rank: number;
+  points: number;
+}
+
 export enum EventType {
   GAME_STARTING_EVENT = 'se.cygni.paintbot.api.event.GameStartingEvent',
   GAME_UPDATE_EVENT = 'se.cygni.paintbot.api.event.MapUpdateEvent',

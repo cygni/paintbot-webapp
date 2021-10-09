@@ -19,7 +19,7 @@ export const defaultTournament: Tournament = {
     addPowerUpLikelihood: 15,
     removePowerUpLikelihood: 5,
     maxNoofPlayers: 10,
-    startObstacles: 5,
+    startObstacles: 30,
     startPowerUps: 0,
     explosionRange: 4,
     gameDurationInSeconds: 180,
