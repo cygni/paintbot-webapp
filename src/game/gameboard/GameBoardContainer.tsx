@@ -443,6 +443,12 @@ export default class GameBoardContainer extends React.Component<Props> {
     }, timeInMsPerFrame);
   }
 
+  componentWillUnmount() {
+    if (this.updateInterval !== undefined) {
+      clearInterval(this.updateInterval);
+    }
+  }
+
   getDirectionName(direction: Direction) {
     switch (direction) {
       case Direction.DOWN:
