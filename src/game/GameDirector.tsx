@@ -1,10 +1,8 @@
 import React from 'react';
 import { Heading1 } from '../common/ui/Heading';
 import { Paper, PaperRow } from '../common/ui/Paper';
-
 import { CharacterColors } from '../common/Constants';
 import Config from '../Config';
-
 import { GameContainer } from './GameContainer';
 import {
   Character,
@@ -13,7 +11,6 @@ import {
   EventType,
   GameBoardState,
   GameMap,
-  GameResult,
   GameSettings,
   GameState,
   TileMap,
@@ -99,10 +96,11 @@ export default class GameDirector extends React.Component<Props, State> {
         const prevData = eventIndex > 0 ? this.events[eventIndex - 1] : undefined;
         const prevState = prevData && prevData.type === EventType.GAME_UPDATE_EVENT ? prevData : data;
         this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
-      }
-      else if (data.type === EventType.GAME_RESULT_EVENT) {
-        const gameResult = data as GameResult;
-        this.updatePointsFromGameResult(gameResult);
+      } else if (data.type === EventType.GAME_ENDED_EVENT) {
+        this.setState({ gameState: data as GameState });
+        const prevData = this.events[eventIndex - 2];
+        const prevState = (prevData && prevData.type === EventType.GAME_UPDATE_EVENT) ? prevData : data;
+        this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
       }
     }
 
@@ -183,16 +181,6 @@ export default class GameDirector extends React.Component<Props, State> {
     });
   }
 
-  private updatePointsFromGameResult(gameResult: GameResult) {
-    const gameState = this.state.gameState;
-    if (gameState) {
-      gameState.map.characterInfos.forEach(c => {
-        c.points = gameResult.playerRanks.filter(p => p.playerId === c.id)[0]?.points || c.points;
-      });
-      this.setState({ gameState: gameState });
-    }
-  }
-
   private endGame() {
     if (this.ws !== undefined) {
       this.ws.close();
@@ -221,14 +209,12 @@ export default class GameDirector extends React.Component<Props, State> {
     const response = await fetch(`${Config.BackendUrl}/history/${this.props.id}`);
     if (response.status === 404) {
       if (this.state.numberOfFetches < 5) {
-        this.setState({numberOfFetches: this.state.numberOfFetches + 1});
+        this.setState({ numberOfFetches: this.state.numberOfFetches + 1 });
         setTimeout(() => this.fetchGame(), 2000);
+      } else {
+        this.setState({ error: 'Game not found' });
       }
-      else {
-        this.setState({error: "Game not found"});
-      }
-    }
-    else {
+    } else {
       const json = await response.json();
       json.messages.forEach((msg: any) => this.events.push(msg));
       this.updateGameSpeedInterval(Config.DefaultGameSpeed);
@@ -274,7 +260,18 @@ export default class GameDirector extends React.Component<Props, State> {
       return <p>Loading game...</p>;
     } else if (gameStatus === EventType.GAME_STARTING_EVENT) {
       return <p>Game is starting...</p>;
-    } else if ((gameStatus === EventType.GAME_UPDATE_EVENT || gameStatus === EventType.GAME_RESULT_EVENT) && gameBoardState && gameSettings) {
+    } else if (
+      (
+        gameStatus === EventType.GAME_UPDATE_EVENT
+        || gameStatus === EventType.GAME_RESULT_EVENT
+        || gameStatus === EventType.GAME_ENDED_EVENT
+      )
+      && gameBoardState
+      && gameSettings
+    ) {
+      if (gameStatus === EventType.GAME_ENDED_EVENT) {
+        this.endGame();
+      }
       return (
         <GameContainer
           gameBoardState={gameBoardState}
@@ -285,9 +282,6 @@ export default class GameDirector extends React.Component<Props, State> {
           onWorldTickChange={this.setWorldTick}
         />
       );
-    } else if (gameStatus === EventType.GAME_ENDED_EVENT) {
-      this.endGame();
-      return <h1>Game finished</h1>;
     }
 
     return null;
