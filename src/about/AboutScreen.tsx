@@ -30,7 +30,7 @@ export default function AboutScreen() {
           <li>Each client must respond within 250ms</li>
           <li>1 point per tile owned</li>
           <li>5 points per stun caused (through power-ups)</li>
-          <li>10 ticks before stun is over</li>
+          <li>8-10 ticks before stun is over</li>
           <li>3 ticks of invulnerability after being stunned</li>
           <li>30 obstacles</li>
           <li>Bots may carry one power-up at a time</li>

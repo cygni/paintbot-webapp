@@ -178,10 +178,18 @@ function SettingsForm(props: any) {
       </PaperListItem>
       <PaperListItem>
         <NumberInput
-          label="noOfTicksStunned"
+          label="minNoOfTicksStunned"
           min={0}
-          onChange={e => updateProperty('noOfTicksStunned', e.target.value)}
-          value={gameSettings.noOfTicksStunned}
+          onChange={e => updateProperty('minNoOfTicksStunned', e.target.value)}
+          value={gameSettings.minNoOfTicksStunned}
+        />
+      </PaperListItem>
+      <PaperListItem>
+        <NumberInput
+          label="maxNoOfTicksStunned"
+          min={0}
+          onChange={e => updateProperty('maxNoOfTicksStunned', e.target.value)}
+          value={gameSettings.maxNoOfTicksStunned}
         />
       </PaperListItem>
       <PaperListItem>

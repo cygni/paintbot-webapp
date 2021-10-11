@@ -41,7 +41,8 @@ export interface GameSettings {
   explosionRange: number;
   gameDurationInSeconds: number;
   noOfTicksInvulnerableAfterStun: number;
-  noOfTicksStunned: number;
+  minNoOfTicksStunned: number;
+  maxNoOfTicksStunned: number;
   pointsPerCausedStun: number;
   pointsPerTileOwned: number;
   timeInMsPerTick: number;
