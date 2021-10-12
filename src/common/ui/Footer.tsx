@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 import { ReactComponent as Logo } from '../../resources/images/cygni-logo.svg';
 
 const StyledFooter = styled.footer`
-  background-color: #25313e;
+  background-color: #000735;
   width: 100%;
   padding: 1rem 0.5rem 0.5rem;
 `;

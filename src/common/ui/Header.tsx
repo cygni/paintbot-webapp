@@ -18,7 +18,7 @@ const SkipNavigation = styled(HashLink)`
   z-index: 1002;
   padding: 1rem;
   background-color: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 2px rgb(0 0 0 / 20%), 0 0 4px rgb(0 0 0 / 20%), 0 0 16px rgb(0 0 0 / 20%);
   transition: left 0.2s ease;
   &:focus {
     left: 10px;
@@ -162,7 +162,7 @@ const HamburgerMenu = styled(motion.div)`
   right: 0;
   width: 200px;
   background-color: white;
-  box-shadow: -2px 0 4px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 2px rgb(0 0 0 / 20%), 0 0 4px rgb(0 0 0 / 20%), 0 0 16px rgb(0 0 0 / 20%);
   z-index: 1002;
   transition: right 0.5s ease;
   @media screen and (min-width: 900px) {
@@ -190,7 +190,7 @@ const StyledHeader = styled.header`
   width: 100%;
   height: 60px;
   background-color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 2px rgb(0 0 0 / 20%), 0 0 4px rgb(0 0 0 / 20%), 0 0 16px rgb(0 0 0 / 20%);
   display: flex;
   justify-content: space-between;
   align-items: center;

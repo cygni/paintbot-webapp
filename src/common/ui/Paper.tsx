@@ -9,14 +9,14 @@ export const Paper = styled.div<PaperProps>`
   justify-content: center;
   flex-direction: column;
   background-color: white;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 2px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%), 0 0 6px rgb(0 0 0 / 10%);
   padding: 1em 0;
   margin-bottom: 1rem;
   width: ${props => props.width};
 `;
 
 export const PaperTopic = styled.h2`
-  margin: 0px;
+  margin: 0;
   text-transform: uppercase;
   font-size: 0.875rem;
   color: #8496ad;

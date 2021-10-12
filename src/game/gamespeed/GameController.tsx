@@ -1,14 +1,34 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import styled from 'styled-components/macro';
 
-import Slider from '../../common/ui/Slider';
-import { Spacing } from '../../common/ui/Spacing';
 import Config from '../../Config';
 
 import { PlayControlButton } from './PlayControlButton';
 
 const GameSpeedContainer = styled.div`
   padding-left: 20px;
+`;
+
+const GameSpeedButton = styled.button`
+  border: none;
+  border-radius: 0;
+  height: 32px;
+  min-width: 32px;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:first-child {
+    border-radius: 6px 0 0 6px;
+  }
+
+  &:last-child {
+    border-radius: 0 6px 6px 0;
+  }
+  
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const toggle = (state: boolean) => !state;
@@ -44,25 +64,31 @@ export function GameController({ onGameSpeedChange, onPauseGame }: GameControlle
   );
 
   return (
-    <Spacing>
-      <FlexContainer>
-        <PlayControlButton playing={playing} onClick={togglePlaying} />
-        <GameSpeedContainer>
-          <div>Game Speed</div>
-          <Slider
-            reverse
-            minValue={Config.GameSpeedMin}
-            maxValue={Config.GameSpeedMax}
-            value={gameSpeed}
-            onChange={setGameSpeed}
-          />
-        </GameSpeedContainer>
-      </FlexContainer>
-    </Spacing>
+    <FlexContainer>
+      <PlayControlButton playing={playing} onClick={togglePlaying} />
+      <GameSpeedContainer role='radiogroup' aria-label='playback speed'>
+        <GameSpeedButton role='radio' aria-checked={gameSpeed === Config.GameSpeedMax}
+                style={gameSpeed === Config.GameSpeedMax ? { backgroundColor: '#eab8b2' } : undefined}
+                onClick={() => setGameSpeed(Config.GameSpeedMax)}>
+          x0.5
+        </GameSpeedButton>
+        <GameSpeedButton role='radio' aria-checked={gameSpeed === Config.DefaultGameSpeed}
+                style={gameSpeed === Config.DefaultGameSpeed ? { backgroundColor: '#eab8b2' } : undefined}
+                onClick={() => setGameSpeed(Config.DefaultGameSpeed)}>
+          x1
+        </GameSpeedButton>
+        <GameSpeedButton role='radio' aria-checked={gameSpeed === Config.GameSpeedMin}
+                style={gameSpeed === Config.GameSpeedMin ? { backgroundColor: '#eab8b2' } : undefined}
+                onClick={() => setGameSpeed(Config.GameSpeedMin)}>
+          x6
+        </GameSpeedButton>
+      </GameSpeedContainer>
+    </FlexContainer>
   );
 }
 
 const FlexContainer = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
 `;

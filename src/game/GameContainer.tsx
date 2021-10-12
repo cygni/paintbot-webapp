@@ -2,78 +2,80 @@ import React from 'react';
 import styled from 'styled-components/macro';
 
 import GameBoardContainer from './gameboard/GameBoardContainer';
-import GameBoardFactory from './gameboard/GameBoardFactory';
 import { GameController } from './gamespeed/GameController';
+import { ProgressBar } from './gamespeed/ProgressBar';
 import ScoreBoardContainer from './scoreboard/ScoreBoardContainer';
 import { TimerPane } from './timer/TimerPane';
-import { Game, GameMap, GameSettings } from './type';
+import { GameBoardState, GameSettings } from './type';
 
 interface GameContainerProps {
-  gameMap: GameMap;
+  gameBoardState: GameBoardState;
   gameSettings: GameSettings;
   onPauseGame(): void;
   onRestartGame(): void;
   onGameSpeedChange(newGameSpeed: number): void;
+  onWorldTickChange(newWorldTick: number): void;
 }
 
-interface GameContainerState {
-  game: Game;
-}
-
-export default class GameContainer extends React.Component<GameContainerProps, GameContainerState> {
-  private readonly gameBoardFactory = new GameBoardFactory();
-
-  private transformGameMapToModel(gameMap: GameMap): Game {
-    return this.gameBoardFactory.getGameBoard(gameMap);
-  }
-
-  private getDurationInTicks({ gameDurationInSeconds, timeInMsPerTick }: GameSettings): number {
+export const GameContainer = ({
+  gameSettings,
+  gameBoardState,
+  onGameSpeedChange,
+  onPauseGame,
+  onRestartGame,
+  onWorldTickChange,
+}: GameContainerProps) => {
+  const lastWorldTick = (1000 * gameSettings.gameDurationInSeconds) / gameSettings.timeInMsPerTick;
+  const getDurationInTicks = ({ gameDurationInSeconds, timeInMsPerTick }: GameSettings): number => {
     return gameDurationInSeconds * 1000 / timeInMsPerTick
   }
+  return (
+    <FlexContainer>
+      <ScoreBoardContainer
+        players={gameBoardState.characters}
+        worldTick={gameBoardState.worldTick}
+        gameDurationInTicks={getDurationInTicks(gameSettings)}
+        ticksPerRender={5} />
+      <Column>
+        <GameBoardContainer gameBoardState={gameBoardState} explosionRange={gameSettings.explosionRange} />
+        <ProgressBar
+          lastWorldTick={lastWorldTick}
+          worldTick={gameBoardState.worldTick}
+          onWorldTickChange={onWorldTickChange}
+        />
+        <GamerControllerContainer>
+          <GameController
+            onGameSpeedChange={onGameSpeedChange}
+            onPauseGame={onPauseGame}
+            onRestartGame={onRestartGame}
+          />
+          <TimerPane
+            durationInSeconds={gameSettings.gameDurationInSeconds}
+            timeInMsPerTick={gameSettings.timeInMsPerTick}
+            worldTick={gameBoardState.worldTick}
+          />
+        </GamerControllerContainer>
+      </Column>
+    </FlexContainer>
+  );
+};
 
-  render() {
-    const { gameSettings, gameMap, onGameSpeedChange, onPauseGame, onRestartGame } = this.props;
-    const game = this.transformGameMapToModel(gameMap);
-    return (
-      <div>
-        <FlexContainer>
-          <ScoreBoardContainer
-            players={game.currentCharacters}
-            worldTick={game.worldTick}
-            gameDurationInTicks={this.getDurationInTicks(gameSettings)}
-            ticksPerRender={5} />
-          <div>
-            <GameBoardContainer game={game} />
-            <GamerControllerContainer>
-              <GameController
-                onGameSpeedChange={onGameSpeedChange}
-                onPauseGame={onPauseGame}
-                onRestartGame={onRestartGame}
-              />
-              <TimerPane
-                durationInSeconds={gameSettings.gameDurationInSeconds}
-                timeInMsPerTick={gameSettings.timeInMsPerTick}
-                worldTick={gameMap.worldTick}
-              />
-            </GamerControllerContainer>
-          </div>
-        </FlexContainer>
-      </div>
-    );
-  }
-}
+const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 2px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%), 0 0 6px rgb(0 0 0 / 10%);
+`;
 
 const GamerControllerContainer = styled.div`
-  padding: 5;
   display: flex;
   justify-content: space-between;
+  background-color: white;
 `;
 
 const FlexContainer = styled.div`
   display: flex;
   flex-direction: column-reverse;
   justify-content: center;
-  padding-top: 20;
   @media screen and (min-width: 1000px) {
     flex-direction: row;
   }

@@ -11,6 +11,11 @@ export enum TileType {
   OBSTACLE = 'obstacle-tile',
 }
 
+export interface TileMap {
+  colour: string;
+  coordinates: Coordinate[];
+}
+
 export interface Coordinate {
   x: number;
   y: number;
@@ -19,6 +24,7 @@ export interface Coordinate {
 export interface GameSettings {
   timeInMsPerTick: number;
   gameDurationInSeconds: number;
+  explosionRange: number;
 }
 
 export interface Game {
@@ -46,6 +52,18 @@ export interface GameMap {
   powerUpPositions: number[];
   obstaclePositions: number[];
   characterInfos: CharacterInfo[];
+  worldTick: number;
+}
+
+export interface GameBoardState {
+  width: number;
+  height: number;
+  powerUpCoordinates: Coordinate[];
+  tiles: TileMap[];
+  newTiles: TileMap[];
+  characters: Character[];
+  prevCharacters: Character[];
+  timeInMsPerTick: number;
   worldTick: number;
 }
 

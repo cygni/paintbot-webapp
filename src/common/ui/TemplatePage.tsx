@@ -29,7 +29,7 @@ const Content = styled.main<ContentProps>`
 `;
 
 const Container = styled.div`
-  background-color: lightslategrey;
+  background-color: #e3d9d7;
   min-height: 100%;
   display: flex;
   flex-direction: column;

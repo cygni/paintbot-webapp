@@ -10,8 +10,10 @@ interface Props {
 }
 
 const TimerContainer = styled.div`
-  font-size: 2rem;
-  font-family: 'Short Stack', sans-serif;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  width: 3.5rem;
 `;
 
 export const TimerPane = ({ durationInSeconds, timeInMsPerTick, worldTick }: Props) => (

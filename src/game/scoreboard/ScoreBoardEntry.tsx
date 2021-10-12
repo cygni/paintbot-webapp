@@ -65,7 +65,7 @@ const Score = styled.div`
 `;
 
 const Card = styled.div`
-  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 2px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%), 0 0 6px rgb(0 0 0 / 10%);
   padding: 10px;
   font-family: 'Short Stack', sans-serif;
 `;
