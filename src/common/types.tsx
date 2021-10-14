@@ -69,20 +69,6 @@ export interface ActiveGamesList {
   games: ActiveGame[];
 }
 
-export interface ArenaHistory {
-  gameId: string;
-  playerPositions: string[];
-}
-
-export interface Arena {
-  arenaName: string;
-  gameId: string;
-  ranked: boolean;
-  onlinePlayers: string[];
-  rating: Map<string, number>;
-  gameHistory: ArenaHistory[];
-}
-
 export interface Account {
   loggedIn: boolean;
   username: string;

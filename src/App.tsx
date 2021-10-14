@@ -2,17 +2,15 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { WebSocketProvider } from './common/API';
 import AccountContext from './common/contexts/AccountContext';
-import ArenaContext, { extractArena } from './common/contexts/ArenaContext';
 import SettersContext from './common/contexts/SettersContext';
 import TournamentContext, { setGamePlayed, validateTour } from './common/contexts/TournamentContext';
-import { Arena, Tournament } from './common/types';
+import { Tournament } from './common/types';
 import { docCookies, isDifferent } from './common/util';
 import Routes from './Routes';
 
 export default function App() {
   const [accContext, setAccContext] = useState(useContext(AccountContext));
   const [tourContext, setTourContext] = useState(useContext(TournamentContext));
-  const [arenaContext, setArenaContext] = useState(useContext(ArenaContext));
   const [setters, setSetters] = useState(useContext(SettersContext));
 
   useEffect(
@@ -43,21 +41,14 @@ export default function App() {
           }
         }
       };
-      const setArena = (arena: Arena, currentArena: Arena) => {
-        const newArena = extractArena(arena);
-        if (isDifferent(newArena, currentArena)) {
-          setArenaContext(newArena);
-        }
-      };
-      const settersToBeUSed = {
+      const settersToBeUsed = {
         forceSetTournament: setTourContext,
         setTournament: tourSetter,
         setAcc: accSetter,
         setTourGamePlayed,
-        setArena,
         settersHasBeenSet: true,
       };
-      setSetters(settersToBeUSed);
+      setSetters(settersToBeUsed);
     },
     [tourContext],
   );
@@ -66,11 +57,9 @@ export default function App() {
     <SettersContext.Provider value={setters}>
       <AccountContext.Provider value={accContext}>
         <TournamentContext.Provider value={tourContext}>
-          <ArenaContext.Provider value={arenaContext}>
-            <WebSocketProvider>
-              <Routes />
-            </WebSocketProvider>
-          </ArenaContext.Provider>
+          <WebSocketProvider>
+            <Routes />
+          </WebSocketProvider>
         </TournamentContext.Provider>
       </AccountContext.Provider>
     </SettersContext.Provider>

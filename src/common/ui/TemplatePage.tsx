@@ -52,9 +52,6 @@ export default function TemplatePage({ center, children }: TemplatePageProps) {
     () => {
       if (shouldFetch && setters.settersHasBeenSet) {
         getActiveTournament();
-        send({
-          type: REQUEST_TYPES.GET_CURRENT_ARENA,
-        });
 
         const token = docCookies.getItem('token');
         const name = docCookies.getItem('name');

@@ -3,7 +3,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Config from '../Config';
 
 import AccountContext from './contexts/AccountContext';
-import ArenaContext, { defaultArena } from './contexts/ArenaContext';
 import SettersContext from './contexts/SettersContext';
 import TournamentContext, { defaultTournament } from './contexts/TournamentContext';
 import WebSocketContext from './contexts/WebSocketContext';
@@ -11,10 +10,7 @@ import { Tournament } from './types';
 
 export const RESPONSE_TYPES = {
   ACTIVE_GAMES_LIST: 'se.cygni.paintbot.eventapi.response.ActiveGamesList',
-  ARENA_UPDATE_EVENT_API_MESSAGE: 'se.cygni.paintbot.eventapi.response.ArenaUpdateEvent',
-  ARENA_UPDATE_EVENT_GAME_MESSAGE: 'se.cygni.paintbot.api.event.ArenaUpdateEvent',
   API_MESSAGE_EXCEPTION: 'se.cygni.paintbot.eventapi.exception.ApiMessageException',
-  CURRENT_ARENA: 'se.cygni.paintbot.eventapi.response.CurrentArena',
   TOURNAMENT_CREATED: 'se.cygni.paintbot.eventapi.response.TournamentCreated',
   TOURNAMENT_GAME_PLAN: 'se.cygni.paintbot.eventapi.model.TournamentGamePlan',
   TOURNAMENT_INFO: 'se.cygni.paintbot.eventapi.model.TournamentInfo',
@@ -25,11 +21,8 @@ export const RESPONSE_TYPES = {
 export const REQUEST_TYPES = {
   CREATE_TOURNAMENT: 'se.cygni.paintbot.eventapi.request.CreateTournament',
   GET_ACTIVE_TOURNAMENT: 'se.cygni.paintbot.eventapi.request.GetActiveTournament',
-  GET_CURRENT_ARENA: 'se.cygni.paintbot.eventapi.request.GetCurrentArena',
   KILL_TOURNAMENT: 'se.cygni.paintbot.eventapi.request.KillTournament',
-  SET_CURRENT_ARENA: 'se.cygni.paintbot.eventapi.request.SetCurrentArena',
   SET_GAME_FILTER: 'se.cygni.paintbot.eventapi.request.SetGameFilter',
-  START_ARENA_GAME: 'se.cygni.paintbot.eventapi.request.StartArenaGame',
   START_GAME: 'se.cygni.paintbot.eventapi.request.StartGame',
   START_TOURNAMENT: 'se.cygni.paintbot.eventapi.request.StartTournament',
   START_TOURNAMENT_GAME: 'se.cygni.paintbot.eventapi.request.StartTournamentGame',
@@ -74,7 +67,6 @@ export function useWebSocket() {
   const setters = useContext(SettersContext);
   const tour = useContext(TournamentContext);
   const acc = useContext(AccountContext);
-  const arena = useContext(ArenaContext);
   const tournamentUpdater = useRestAPIToGetActiveTournament(setters, tour);
   const [ws, setWs] = useState(new WebSocket(Config.WebSocketApiUrl));
   const [queuedMessages, setQueuedMessages] = useState(new Array<string>());
@@ -108,16 +100,6 @@ export function useWebSocket() {
     const { type, ...response } = jsonResponse;
     // console.log(`MESSAGE OF TYPE: ${type} \nRECEIVED FROM ${ws.url}`);
     switch (type) {
-      case RESPONSE_TYPES.CURRENT_ARENA:
-        sender({
-          type: REQUEST_TYPES.SET_CURRENT_ARENA,
-          currentArena: response.currentArena ? response.currentArena : defaultArena.arenaName,
-        });
-        break;
-      case RESPONSE_TYPES.ARENA_UPDATE_EVENT_API_MESSAGE:
-      case RESPONSE_TYPES.ARENA_UPDATE_EVENT_GAME_MESSAGE:
-        setters.setArena(response, arena);
-        break;
       case RESPONSE_TYPES.TOURNAMENT_KILLED:
         setters.setTournament(defaultTournament, tour, type);
       // falls through

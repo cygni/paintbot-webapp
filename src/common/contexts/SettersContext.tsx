@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Arena, Tournament } from '../types';
+import { Tournament } from '../types';
 
 const SettersContext = React.createContext({
   setTournament: (tournament: any, currentContext: Tournament, messType: string) => {
@@ -17,10 +17,6 @@ const SettersContext = React.createContext({
   },
   setTourGamePlayed: (gameId: string, isPlayed: boolean) => {
     console.log('called setTourGamePlayed');
-    console.log('Set your setters!');
-  },
-  setArena: (newArena: Arena, oldArena: Arena) => {
-    console.log('called setArena');
     console.log('Set your setters!');
   },
   settersHasBeenSet: false,
