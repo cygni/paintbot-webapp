@@ -42,7 +42,7 @@ export default function Controls({ started }: ControlsProps) {
   const showStart = !started && tour.gamePlan.players.length > 0;
   const accContext = useContext(AccountContext);
   const tourContext = useContext(TournamentContext);
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
 
   function handleStart() {
     const mess = {

@@ -46,7 +46,7 @@ export default function TemplatePage({ center, children }: TemplatePageProps) {
   const setters = useContext(SettersContext);
   const getActiveTournament = useRestAPIToGetActiveTournament(setters, tour);
   const [shouldFetch, setShouldFetch] = useState(true);
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
 
   useEffect(
     () => {

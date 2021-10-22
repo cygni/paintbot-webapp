@@ -19,7 +19,7 @@ const Form = styled.form`
 export default function TournamentCreator() {
   const accContext = useContext(AccountContext);
   const [tourName, setTourName] = useState('');
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

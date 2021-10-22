@@ -28,7 +28,7 @@ export default function GamePlan({ lvl, game, players, playedGames }: GamePlanPr
   const tour = useContext(TournamentContext);
   const levels = tour.gamePlan.tournamentLevels;
   const started = levels.length > 0 && levels[0].tournamentGames[0].gameId !== null;
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
   const acc = useContext(AccountContext);
   const noLevels = tour.gamePlan.noofLevels;
   const [showNextGame, setShowNextGame] = useState(lvl === 0 && game === 0 && !tour.winner);

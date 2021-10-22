@@ -11,7 +11,7 @@ import GameLink from '../../common/ui/GameLink';
 export default function TournamentGameLink(props: any) {
   const [clicked, setClicked] = useState(false);
   const accContext = useContext(AccountContext);
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
   const game: Game = props.game;
 
   const hc = (event: any) => {

@@ -20,6 +20,10 @@ export const RESPONSE_TYPES = {
   TOURNAMENT_INFO: 'se.cygni.paintbot.eventapi.model.TournamentInfo',
   TOURNAMENT_KILLED: 'se.cygni.paintbot.eventapi.response.TournamentKilled',
   UNAUTHORIZED: 'se.cygni.paintbot.eventapi.exception.Unauthorized',
+  GAME_STARTING_EVENT: 'se.cygni.paintbot.api.event.GameStartingEvent',
+  MAP_UPDATE_EVENT: 'se.cygni.paintbot.api.event.MapUpdateEvent',
+  GAME_RESULT_EVENT: 'se.cygni.paintbot.api.event.GameResultEvent',
+  GAME_ENDED_EVENT: 'se.cygni.paintbot.api.event.GameEndedEvent',
 };
 
 export const REQUEST_TYPES = {
@@ -78,6 +82,7 @@ export function useWebSocket() {
   const tournamentUpdater = useRestAPIToGetActiveTournament(setters, tour);
   const [ws, setWs] = useState(new WebSocket(Config.WebSocketApiUrl));
   const [queuedMessages, setQueuedMessages] = useState(new Array<string>());
+  const [subscribers, setSubscribers] = useState(new Array<(msg: any) => void>());
 
   const handleError = (e: any) => {
     console.log(e);
@@ -125,6 +130,16 @@ export function useWebSocket() {
         forceUpdate();
         break;
       case RESPONSE_TYPES.ACTIVE_GAMES_LIST:
+        sender({
+          type: REQUEST_TYPES.SET_GAME_FILTER,
+          includedGameIds: response.games.map((g: any) => g.gameId),
+        });
+        break;
+      case RESPONSE_TYPES.GAME_STARTING_EVENT:
+      case RESPONSE_TYPES.MAP_UPDATE_EVENT:
+      case RESPONSE_TYPES.GAME_RESULT_EVENT:
+      case RESPONSE_TYPES.GAME_ENDED_EVENT:
+        subscribers.forEach(subscriber => subscriber(jsonResponse));
         break;
       case RESPONSE_TYPES.UNAUTHORIZED:
         setters.setAcc(false, '', '');
@@ -161,6 +176,7 @@ export function useWebSocket() {
       if (state === ws.CONNECTING || state === ws.OPEN) {
         ws.close();
       }
+      setSubscribers(new Array<(msg: any) => void>());
     },
     [ws],
   );
@@ -185,11 +201,25 @@ export function useWebSocket() {
     [queuedMessages, ws],
   );
 
-  return { open: opener, send: sender, close: closer };
+  const subscriber = useCallback(
+    (subscriber: (msg: any) => void) => {
+      setSubscribers([...subscribers, subscriber]);
+    },
+    [subscribers],
+  );
+
+  const unsubscriber = useCallback(
+    (subscriber: (msg: any) => void) => {
+      setSubscribers(subscribers.filter(sub => sub !== subscriber));
+    },
+    [subscribers],
+  );
+
+  return { open: opener, send: sender, subscribe: subscriber, unsubscribe: unsubscriber, close: closer };
 }
 
 export function WebSocketProvider(props: any) {
-  const { send, close } = useWebSocket();
+  const { send, subscribe, unsubscribe, close } = useWebSocket();
 
   useEffect(
     () => {
@@ -198,5 +228,5 @@ export function WebSocketProvider(props: any) {
     [close],
   );
 
-  return <WebSocketContext.Provider value={send}>{props.children}</WebSocketContext.Provider>;
+  return <WebSocketContext.Provider value={{ send, subscribe, unsubscribe }}>{props.children}</WebSocketContext.Provider>;
 }
