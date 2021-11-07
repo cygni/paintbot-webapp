@@ -19,6 +19,7 @@ import WebSocketContext from '../common/contexts/WebSocketContext';
 
 interface Props {
   id?: string;
+  tournamentIds?: string[];
 }
 
 interface State {
@@ -78,10 +79,12 @@ export default class GameDirector extends React.Component<Props, State> {
   }
 
   private onUpdateFromServer(data: any) {
-    this.events.push(data);
-    if (data.type === EventType.GAME_STARTING_EVENT) {
-      this.currentEventIndex = this.events.length - 1;
-      this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+    if (this.props?.tournamentIds?.includes(data?.gameId)) {
+      this.events.push(data);
+      if (data.type === EventType.GAME_STARTING_EVENT) {
+        this.currentEventIndex = this.events.length - 1;
+        this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+      }
     }
   }
 

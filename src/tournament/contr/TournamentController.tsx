@@ -71,7 +71,9 @@ export default function TournamentController() {
 
   return (
     <div>
-      <GameDirector />
+      <GameDirector
+        tournamentIds={levels.flatMap(l => l.tournamentGames.map(g => g.gameId))}
+      />
       <PaperGrid>
         <div>
           <Paper>
