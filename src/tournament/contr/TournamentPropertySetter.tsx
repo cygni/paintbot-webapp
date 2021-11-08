@@ -23,7 +23,7 @@ export default function TournamentPropertySetter() {
   const accContext = useContext(AccountContext);
   const [currentProperties, setCurrentProperties] = useState(tourContext);
   const gameSettings = currentProperties.gameSettings;
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
 
   const handleSubmit = (event: any) => {
     if (event !== null) {

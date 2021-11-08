@@ -7,7 +7,7 @@ import WebSocketContext from '../common/contexts/WebSocketContext';
 
 export default function ArenaForm() {
   const arenaContext = useContext(ArenaContext);
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
 
   const handleSubmit = (event: any) => {
     event.preventDefault();

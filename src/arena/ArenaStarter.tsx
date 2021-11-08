@@ -6,7 +6,7 @@ import WebSocketContext from '../common/contexts/WebSocketContext';
 import DefaultButton from '../common/ui/DefaultButton';
 
 export default function ArenaStarter() {
-  const send = useContext(WebSocketContext);
+  const { send } = useContext(WebSocketContext);
   const arena = useContext(ArenaContext);
 
   const startArena = (event: any) => {

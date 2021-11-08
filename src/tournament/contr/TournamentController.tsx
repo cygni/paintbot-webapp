@@ -12,6 +12,7 @@ import GamePlan, { PlayedGame } from './GamePlan';
 import Players from './Players';
 import TournamentPropertySetter from './TournamentPropertySetter';
 import Settings from './Settings';
+import GameDirector from '../../game/GameDirector';
 
 interface NextGame {
   lvl: number;
@@ -20,9 +21,12 @@ interface NextGame {
 }
 
 const PaperGrid = styled.div`
-  width: 100%;
+  width: 60rem;
+  max-width: calc(100vw - 2rem);
   display: grid;
   gap: 1rem;
+  margin: auto;
+  margin-top: 1rem;
 
   @media screen and (min-width: 600px) {
     grid-template-columns: 1fr auto;
@@ -66,24 +70,29 @@ export default function TournamentController() {
   );
 
   return (
-    <PaperGrid>
-      <div>
-        <Paper>
-          <PaperRow>
-            <Heading1>{tour.tournamentName}</Heading1>
-            <p>It's on! Start the tournament once all players have joined.</p>
-            {acc.loggedIn && <Controls started={started} />}
-          </PaperRow>
-          <Players />
-        </Paper>
-        {started && (
-          <GamePlan lvl={nextGame.lvl} game={nextGame.game} players={nextGame.players} playedGames={playedGames} />
-        )}
-      </div>
-      <div>
-        {showSetters && <TournamentPropertySetter />}
-        {!showSetters && <Settings />}
-      </div>
-    </PaperGrid>
+    <div>
+      <GameDirector
+        tournamentIds={levels.flatMap(l => l.tournamentGames.map(g => g.gameId))}
+      />
+      <PaperGrid>
+        <div>
+          <Paper>
+            <PaperRow>
+              <Heading1>{tour.tournamentName}</Heading1>
+              <p>It's on! Start the tournament once all players have joined.</p>
+              {acc.loggedIn && <Controls started={started} />}
+            </PaperRow>
+            <Players />
+          </Paper>
+          {started && (
+            <GamePlan lvl={nextGame.lvl} game={nextGame.game} players={nextGame.players} playedGames={playedGames} />
+          )}
+        </div>
+        <div>
+          {showSetters && <TournamentPropertySetter />}
+          {!showSetters && <Settings />}
+        </div>
+      </PaperGrid>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ContextType } from 'react';
 import { Heading1 } from '../common/ui/Heading';
 import { Paper, PaperRow } from '../common/ui/Paper';
 import { CharacterColors } from '../common/Constants';
@@ -15,9 +15,11 @@ import {
   GameState,
   TileMap,
 } from './type';
+import WebSocketContext from '../common/contexts/WebSocketContext';
 
 interface Props {
   id?: string;
+  tournamentIds?: string[];
 }
 
 interface State {
@@ -55,7 +57,9 @@ const colours = [
 // TODO Handle receiving results when EventType === GAME_RESULT_EVENT
 
 export default class GameDirector extends React.Component<Props, State> {
-  private ws?: WebSocket;
+  static contextType = WebSocketContext;
+
+  context!: ContextType<typeof WebSocketContext>;
   private readonly events: any[] = [];
   private currentEventIndex = 0;
   private timeInMsPerTick: number = Config.DefaultGameSpeed;
@@ -69,8 +73,21 @@ export default class GameDirector extends React.Component<Props, State> {
     error: undefined,
   };
 
-  private onUpdateFromServer(evt: MessageEvent) {
-    this.events.push(JSON.parse(evt.data));
+  constructor(props: Props) {
+    super(props);
+    this.onUpdateFromServer = this.onUpdateFromServer.bind(this);
+  }
+
+  private onUpdateFromServer(data: any) {
+    if (this.props?.tournamentIds?.includes(data?.gameId)) {
+      this.events.push(data);
+      if (data.type === EventType.GAME_STARTING_EVENT) {
+        this.currentEventIndex = 0;
+        this.events.length = 0;
+        this.events.push(data);
+        this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+      }
+    }
   }
 
   private readonly updateGameSpeedInterval = (milliseconds: number) => {
@@ -84,27 +101,29 @@ export default class GameDirector extends React.Component<Props, State> {
   };
 
   private playOneTick(eventIndex: number): void {
-    const data = this.events[eventIndex];
-    if (data) {
-      if (data.type === EventType.GAME_STARTING_EVENT) {
-        this.setState({
-          gameSettings: data.gameSettings as GameSettings,
-          gameState: data as GameState,
-        });
-      } else if (data.type === EventType.GAME_UPDATE_EVENT) {
-        this.setState({ gameState: data as GameState });
-        const prevData = eventIndex > 0 ? this.events[eventIndex - 1] : undefined;
-        const prevState = prevData && prevData.type === EventType.GAME_UPDATE_EVENT ? prevData : data;
-        this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
-      } else if (data.type === EventType.GAME_ENDED_EVENT) {
-        this.setState({ gameState: data as GameState });
-        const prevData = this.events[eventIndex - 2];
-        const prevState = (prevData && prevData.type === EventType.GAME_UPDATE_EVENT) ? prevData : data;
-        this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
+    if (eventIndex < this.events.length) {
+      const data = this.events[eventIndex];
+      if (data) {
+        if (data.type === EventType.GAME_STARTING_EVENT) {
+          this.setState({
+            gameSettings: data.gameSettings as GameSettings,
+            gameState: data as GameState,
+          });
+        } else if (data.type === EventType.GAME_UPDATE_EVENT) {
+          this.setState({ gameState: data as GameState });
+          const prevData = eventIndex > 0 ? this.events[eventIndex - 1] : undefined;
+          const prevState = prevData && prevData.type === EventType.GAME_UPDATE_EVENT ? prevData : data;
+          this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
+        } else if (data.type === EventType.GAME_ENDED_EVENT) {
+          this.setState({ gameState: data as GameState });
+          const prevData = this.events[eventIndex - 2];
+          const prevState = (prevData && prevData.type === EventType.GAME_UPDATE_EVENT) ? prevData : data;
+          this.setState({ gameBoardState: this.createGameBoardState(prevState.map, data.map) });
+        }
       }
-    }
 
-    this.currentEventIndex++;
+      this.currentEventIndex++;
+    }
   }
 
   private createGameBoardState(prevGameMap: GameMap, gameMap: GameMap): GameBoardState {
@@ -182,8 +201,8 @@ export default class GameDirector extends React.Component<Props, State> {
   }
 
   private endGame() {
-    if (this.ws !== undefined) {
-      this.ws.close();
+    if (!this.props.id) {
+      this.context.unsubscribe(this.onUpdateFromServer);
     }
     if (this.updateInterval !== undefined) {
       clearInterval(this.updateInterval);
@@ -225,9 +244,7 @@ export default class GameDirector extends React.Component<Props, State> {
     if (this.props.id) {
       this.fetchGame();
     } else {
-      this.ws = new WebSocket(Config.WebSocketApiUrl);
-      this.ws.onmessage = (evt: MessageEvent) => this.onUpdateFromServer(evt);
-      this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+      this.context.subscribe(this.onUpdateFromServer);
     }
   }
 
@@ -257,7 +274,12 @@ export default class GameDirector extends React.Component<Props, State> {
     }
 
     if (!gameStatus) {
-      return <p>Loading game...</p>;
+      if (this.props.id) {
+        return <p>Loading game...</p>;
+      }
+      else {
+        return null;
+      }
     } else if (gameStatus === EventType.GAME_STARTING_EVENT) {
       return <p>Game is starting...</p>;
     } else if (
@@ -269,7 +291,7 @@ export default class GameDirector extends React.Component<Props, State> {
       && gameBoardState
       && gameSettings
     ) {
-      if (gameStatus === EventType.GAME_ENDED_EVENT) {
+      if (this.props.id && gameStatus === EventType.GAME_ENDED_EVENT) {
         this.endGame();
       }
       return (
