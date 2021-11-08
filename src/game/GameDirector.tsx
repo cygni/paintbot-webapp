@@ -19,7 +19,7 @@ import WebSocketContext from '../common/contexts/WebSocketContext';
 
 interface Props {
   id?: string;
-  tournamentIds?: string[];
+  gameIds?: string[];
 }
 
 interface State {
@@ -59,6 +59,21 @@ const colours = [
 export default class GameDirector extends React.Component<Props, State> {
   static contextType = WebSocketContext;
 
+  private static isGameRunningEvent(gameStatus: EventType) {
+    return (
+      gameStatus === EventType.GAME_UPDATE_EVENT
+      || gameStatus === EventType.GAME_RESULT_EVENT
+      || gameStatus === EventType.GAME_ENDED_EVENT
+    )
+  }
+
+  private static getCoordinate(position: number, gameMapWidth: number): Coordinate {
+    return {
+      x: position % gameMapWidth,
+      y: Math.floor(position / gameMapWidth),
+    };
+  }
+
   context!: ContextType<typeof WebSocketContext>;
   private readonly events: any[] = [];
   private currentEventIndex = 0;
@@ -78,15 +93,21 @@ export default class GameDirector extends React.Component<Props, State> {
     this.onUpdateFromServer = this.onUpdateFromServer.bind(this);
   }
 
+  private readonly isHistoryGame = () => !!this.props.id;
+  private readonly isLiveGame = () => !this.isHistoryGame();
+
+  private clearGame() {
+    this.currentEventIndex = 0;
+    this.events.length = 0;
+    this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+  }
+
   private onUpdateFromServer(data: any) {
-    if (this.props?.tournamentIds?.includes(data?.gameId)) {
-      this.events.push(data);
+    if (this.props.gameIds?.includes(data?.gameId)) {
       if (data.type === EventType.GAME_STARTING_EVENT) {
-        this.currentEventIndex = 0;
-        this.events.length = 0;
-        this.events.push(data);
-        this.updateGameSpeedInterval(Config.DefaultGameSpeed);
+        this.clearGame();
       }
+      this.events.push(data);
     }
   }
 
@@ -130,20 +151,13 @@ export default class GameDirector extends React.Component<Props, State> {
     return {
       width: gameMap.width,
       height: gameMap.height,
-      powerUpCoordinates: gameMap.powerUpPositions.map(position => this.getCoordinate(position, gameMap.width)),
+      powerUpCoordinates: gameMap.powerUpPositions.map(position => GameDirector.getCoordinate(position, gameMap.width)),
       tiles: this.getTiles(prevGameMap),
       newTiles: this.getNewTiles(prevGameMap, gameMap),
       characters: this.getCharacters(gameMap),
       prevCharacters: this.getCharacters(prevGameMap),
       timeInMsPerTick: this.timeInMsPerTick,
       worldTick: gameMap.worldTick,
-    };
-  }
-
-  private getCoordinate(position: number, gameMapWidth: number): Coordinate {
-    return {
-      x: position % gameMapWidth,
-      y: Math.floor(position / gameMapWidth),
     };
   }
 
@@ -160,12 +174,12 @@ export default class GameDirector extends React.Component<Props, State> {
     );
     const paperTiles = {
       colour: 'white',
-      coordinates: paperPositions.map(position => this.getCoordinate(position, gameMap.width)),
+      coordinates: paperPositions.map(position => GameDirector.getCoordinate(position, gameMap.width)),
     };
     const colourTiles = gameMap.characterInfos.map((characterInfo: CharacterInfo, index: number) => {
       return {
         colour: colours[index],
-        coordinates: characterInfo.colouredPositions.map(position => this.getCoordinate(position, gameMap.width)),
+        coordinates: characterInfo.colouredPositions.map(position => GameDirector.getCoordinate(position, gameMap.width)),
       };
     });
     return [paperTiles, ...colourTiles];
@@ -178,7 +192,7 @@ export default class GameDirector extends React.Component<Props, State> {
       );
       return {
         colour: colours[index],
-        coordinates: positions.map(position => this.getCoordinate(position, gameMap.width)),
+        coordinates: positions.map(position => GameDirector.getCoordinate(position, gameMap.width)),
       };
     });
   }
@@ -201,7 +215,7 @@ export default class GameDirector extends React.Component<Props, State> {
   }
 
   private endGame() {
-    if (!this.props.id) {
+    if (this.isLiveGame()) {
       this.context.unsubscribe(this.onUpdateFromServer);
     }
     if (this.updateInterval !== undefined) {
@@ -213,10 +227,6 @@ export default class GameDirector extends React.Component<Props, State> {
     if (this.updateInterval !== undefined) {
       clearInterval(this.updateInterval);
     }
-  };
-
-  private readonly restartGame = () => {
-    this.currentEventIndex = 0;
   };
 
   private readonly setWorldTick = (worldTick: number) => {
@@ -241,7 +251,7 @@ export default class GameDirector extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.id) {
+    if (this.isHistoryGame()) {
       this.fetchGame();
     } else {
       this.context.subscribe(this.onUpdateFromServer);
@@ -274,24 +284,17 @@ export default class GameDirector extends React.Component<Props, State> {
     }
 
     if (!gameStatus) {
-      if (this.props.id) {
+      if (this.isHistoryGame()) {
         return <p>Loading game...</p>;
       }
       else {
-        return null;
+        return <p>No game data. Start a game to watch it.</p>;
       }
     } else if (gameStatus === EventType.GAME_STARTING_EVENT) {
       return <p>Game is starting...</p>;
     } else if (
-      (
-        gameStatus === EventType.GAME_UPDATE_EVENT
-        || gameStatus === EventType.GAME_RESULT_EVENT
-        || gameStatus === EventType.GAME_ENDED_EVENT
-      )
-      && gameBoardState
-      && gameSettings
-    ) {
-      if (this.props.id && gameStatus === EventType.GAME_ENDED_EVENT) {
+      GameDirector.isGameRunningEvent(gameStatus) && gameBoardState && gameSettings) {
+      if (this.isHistoryGame() && gameStatus === EventType.GAME_ENDED_EVENT) {
         this.endGame();
       }
       return (
@@ -300,7 +303,6 @@ export default class GameDirector extends React.Component<Props, State> {
           gameSettings={gameSettings}
           onGameSpeedChange={this.updateGameSpeedInterval}
           onPauseGame={this.pauseGame}
-          onRestartGame={this.restartGame}
           onWorldTickChange={this.setWorldTick}
         />
       );

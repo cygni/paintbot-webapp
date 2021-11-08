@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import ArenaContext from '../common/contexts/ArenaContext';
-import GameLink from '../common/ui/GameLink';
+import { GameLink } from '../common/ui/GameLink';
 import { PaperListItem } from '../common/ui/Paper';
 
 export default function CurrentArenaGame() {

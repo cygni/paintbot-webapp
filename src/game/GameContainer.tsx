@@ -11,10 +11,9 @@ import { GameBoardState, GameSettings } from './type';
 interface GameContainerProps {
   gameBoardState: GameBoardState;
   gameSettings: GameSettings;
-  onPauseGame(): void;
-  onRestartGame(): void;
-  onGameSpeedChange(newGameSpeed: number): void;
-  onWorldTickChange(newWorldTick: number): void;
+  onPauseGame: () => void;
+  onGameSpeedChange: (newGameSpeed: number) => void;
+  onWorldTickChange: (newWorldTick: number) => void;
 }
 
 export const GameContainer = ({
@@ -22,7 +21,6 @@ export const GameContainer = ({
   gameBoardState,
   onGameSpeedChange,
   onPauseGame,
-  onRestartGame,
   onWorldTickChange,
 }: GameContainerProps) => {
   const lastWorldTick = (1000 * gameSettings.gameDurationInSeconds) / gameSettings.timeInMsPerTick;
@@ -30,7 +28,7 @@ export const GameContainer = ({
     return gameDurationInSeconds * 1000 / timeInMsPerTick
   }
   return (
-    <FlexContainer>
+    <Wrapper>
       <ScoreBoardContainer
         players={gameBoardState.characters}
         worldTick={gameBoardState.worldTick}
@@ -47,7 +45,6 @@ export const GameContainer = ({
           <GameController
             onGameSpeedChange={onGameSpeedChange}
             onPauseGame={onPauseGame}
-            onRestartGame={onRestartGame}
           />
           <TimerPane
             durationInSeconds={gameSettings.gameDurationInSeconds}
@@ -56,7 +53,7 @@ export const GameContainer = ({
           />
         </GamerControllerContainer>
       </Column>
-    </FlexContainer>
+    </Wrapper>
   );
 };
 
@@ -72,7 +69,7 @@ const GamerControllerContainer = styled.div`
   background-color: white;
 `;
 
-const FlexContainer = styled.div`
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column-reverse;
   justify-content: center;

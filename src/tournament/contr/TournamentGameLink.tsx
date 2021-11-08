@@ -6,7 +6,7 @@ import AccountContext from '../../common/contexts/AccountContext';
 import WebSocketContext from '../../common/contexts/WebSocketContext';
 import { Game } from '../../common/types';
 import DefaultButton from '../../common/ui/DefaultButton';
-import GameLink from '../../common/ui/GameLink';
+import { GameLink } from '../../common/ui/GameLink';
 
 export default function TournamentGameLink(props: any) {
   const [clicked, setClicked] = useState(false);
@@ -28,7 +28,7 @@ export default function TournamentGameLink(props: any) {
   const players = game.players.map(value => `${value.name}`).reduce((prev, curr) => `${prev} ${curr}`);
 
   const getWinner = (g: Game) => {
-    const winner = g.players.find((player, index, obj) => player.isWinner);
+    const winner = g.players.find((player) => player.isWinner);
     return winner ? winner.name : '';
   };
 
