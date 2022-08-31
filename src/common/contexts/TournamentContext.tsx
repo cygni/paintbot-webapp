@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { RESPONSE_TYPES } from '../API';
+import { RESPONSE_TYPES } from '../../api/API';
 import { Game, Tournament, TournamentLevel } from '../types';
 
 export const defaultTournament: Tournament = {

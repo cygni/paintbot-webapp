@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "target": "es5",
+    "target": "ES5",
+    "types": ["vite/client", "jest"],
     "lib": ["dom", "dom.iterable", "esnext"],
     "sourceMap": true,
     "allowJs": true,
@@ -21,9 +22,8 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "plugins": [{ "name": "typescript-styled-plugin" }]
+    "isolatedModules": true
   },
   "include": ["src"],
-  "exclude": ["**/*.json"]
+  "exclude": ["**/*.json", "node_modules"]
 }

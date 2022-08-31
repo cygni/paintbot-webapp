@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  font-family: Barlow, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  background-color: #000735;
+  color: #231f20;
+}
+
+code {
+  font-family: source-code-pro, monospace;
+}
+
+input,
+select,
+button {
+  font-size: 1rem;
+  font-family: 'Short Stack', sans-serif;
+}
+
+#root {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column; 
+}
